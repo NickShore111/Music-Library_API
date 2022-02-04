@@ -15,7 +15,7 @@ def create_artist(
     db: Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user),
 ):
-    """Add one artist to the database"""
+    """Add an artist to the database"""
 
     duplicate_artist = (
         db.query(models.Artist).filter(models.Artist.name == artist.name).first()
@@ -94,18 +94,29 @@ def delete_artist(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/", response_model=List[schemas.ArtistBaseOut])
-def get_artists(db: Session = Depends(get_db), name: Optional[str] = ""):
+@router.get("/", response_model=List[schemas.ArtistOut])
+def get_artists(
+    db: Session = Depends(get_db),
+    name: Optional[str] = "",
+    limit: int = 10,
+    skip: int = 0,
+):
     """Returns a list of all artists in database if no query parameter entered"""
 
-    artists = db.query(models.Artist).filter(models.Artist.name.contains(name)).all()
+    artists = (
+        db.query(models.Artist)
+        .filter(models.Artist.name.contains(name))
+        .limit(limit)
+        .offset(skip)
+        .all()
+    )
 
     return artists
 
 
 @router.get("/{id}", response_model=schemas.ArtistOut)
 def get_artist(id: int, db: Session = Depends(get_db)):
-    """Returns one artist with list of all associated songs"""
+    """Returns one artist by id with a list of their related songs"""
 
     artist = db.query(models.Artist).filter(models.Artist.id == id).first()
     if not artist:

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime, time
 from pydantic.types import conint
 
@@ -23,7 +23,7 @@ class UserLogin(BaseModel):
 
 class ArtistBase(BaseModel):
     id: int
-    artist: str
+    name: str
 
 
 class PlaylistSongs(BaseModel):
@@ -53,7 +53,7 @@ class Like(BaseModel):
 
 class SongCreate(BaseModel):
     title: str
-    genre: Optional[str] = None
+    genre: Optional[Union[int, str]] = None
     artist_id: int
     length: time
 
@@ -81,6 +81,7 @@ class PlaylistUpdate(PlaylistBase):
 class SongUpdate(BaseModel):
     title: Optional[str]
     genre: Optional[str]
+    artist_id: Optional[int]
 
 
 """ Return Schemas """
@@ -91,18 +92,9 @@ class ArtistBaseOut(ArtistBase):
         orm_mode = True
 
 
-class ArtistCreateOut(BaseModel):
-    id: int
-    artist: str
-
-    class Config:
-        orm_mode = True
-
-
-class ArtistUpdateOut(BaseModel):
-    id: int
-    artist: str
-    songs: Optional[List[SongBase]]
+class ArtistCreateOut(ArtistBase):
+    created_at: datetime
+    updated_at: Optional[datetime]
 
     class Config:
         orm_mode = True
@@ -110,7 +102,7 @@ class ArtistUpdateOut(BaseModel):
 
 class ArtistOut(BaseModel):
     id: int
-    artist: str
+    name: str
     created_by: int
     songs: Optional[List[SongBase]]
 
@@ -134,7 +126,7 @@ class SongUpdateOut(BaseModel):
 class Song(BaseModel):
     id: int
     title: str
-    genre: Optional[str]
+    genre: int
     length: time
     artist_id: int
     created_at: datetime

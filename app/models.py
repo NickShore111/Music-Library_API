@@ -9,7 +9,7 @@ from .database import Base
 
 
 class User(Base):
-    """Creates a User table in db"""
+    """Describes a User table in db"""
 
     __tablename__ = "users"
     id = Column(Integer, primary_key=True)
@@ -21,7 +21,7 @@ class User(Base):
 
 
 class Tag(Base):
-    """Creates a Tags table in db used for describing Playlists"""
+    """Describes a Tags table for describing Playlists"""
 
     __tablename__ = "tags"
     id = Column(Integer, primary_key=True)
@@ -29,7 +29,7 @@ class Tag(Base):
 
 
 class Playlist(Base):
-    """Creates a Playlist table in db"""
+    """Describes a Playlist table in db"""
 
     __tablename__ = "playlists"
     id = Column(Integer, primary_key=True)
@@ -58,7 +58,7 @@ class PlaylistTags(Base):
 
 
 class Artist(Base):
-    """Creates an Artists table in db"""
+    """Describes an Artists table in db"""
 
     __tablename__ = "artists"
     id = Column(Integer, primary_key=True)
@@ -73,7 +73,7 @@ class Artist(Base):
 
 
 class Genre(Base):
-    """Creates a Genres table in db"""
+    """Creates a relationship table for Genres to Songs"""
 
     __tablename__ = "genres"
     id = Column(Integer, primary_key=True)
@@ -88,6 +88,7 @@ class Song(Base):
     title = Column(String, nullable=False)
     length = Column(Time, nullable=True)
     genre = Column(Integer, ForeignKey("genres.id", ondelete="CASCADE"), nullable=True)
+    # genre_id = Column(Integer, ForeignKey("genres.id", ondelete="CASCADE"), nullable=True)
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("NOW()")
     )
