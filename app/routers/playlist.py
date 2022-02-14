@@ -18,6 +18,17 @@ def create_playlist(
     db: Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user),
 ):
+    duplicate_playlist = (
+        db.query(models.Playlist)
+        .filter(models.Playlist.name == playlist.name)
+        .filter(models.Playlist.created_by == current_user.id)
+        .first()
+    )
+    if duplicate_playlist:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Playlist with name: '{playlist.name}' already exists for user: {current_user.id}",
+        )
     new_playlist = models.Playlist(created_by=current_user.id, **playlist.dict())
     db.add(new_playlist)
     db.commit()

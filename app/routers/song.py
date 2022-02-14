@@ -25,28 +25,33 @@ def create_song(
 
     # If genre is str then coerce song.genre to genre.id
     # And check if genre classification is in db
-    if song.genre is not None:
-        print(song.genre)
-        if type(song.genre) is str:
-            # print("Genre is type string")
-            genre_str_id = (
-                db.query(models.Genre).filter(models.Genre.genre == song.genre).first()
-            )
-            if genre_str_id is None:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Genre type: {song.genre} not found",
-                )
-            song.genre = genre_str_id.id
-        else:
-            genre_int_id = (
-                db.query(models.Genre).filter(models.Genre.id == song.genre).first()
-            )
-            if genre_int_id is None:
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND,
-                    detail=f"Genre id: {song.genre} not found",
-                )
+    # if song.genre is not None:
+    #     if type(song.genre) is str:
+    #         # print("Genre is type string")
+    #         genre_str_id = (
+    #             db.query(models.Genre).filter(models.Genre.genre == song.genre).first()
+    #         )
+    #         if genre_str_id is None:
+    #             raise HTTPException(
+    #                 status_code=status.HTTP_404_NOT_FOUND,
+    #                 detail=f"Genre type: {song.genre} not found",
+    #             )
+    #         song.genre = genre_str_id.id
+    #     else:
+    #         genre_int_id = (
+    #             db.query(models.Genre).filter(models.Genre.id == song.genre).first()
+    #         )
+    #         if genre_int_id is None:
+    #             raise HTTPException(
+    #                 status_code=status.HTTP_404_NOT_FOUND,
+    #                 detail=f"Genre id: {song.genre} not found",
+    #             )
+    genre = db.query(models.Genre).filter(models.Genre.id == song.genre_id).first()
+    if genre is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Genre id: {song.genre_id} not found",
+        )
 
     # Check if song is already in db under assigned artist
     duplicate_song = (
@@ -100,36 +105,40 @@ def update_song(
     return song_query.first()
 
 
-# @router.get("/", response_model=List[schemas.SongsOut])
-@router.get("/")
+@router.get("/", response_model=List[schemas.SongsOut])
 def get_songs(
     db: Session = Depends(get_db),
     title: Optional[str] = "",
-    genre: Optional[Union[int, str]] = "",
-    # limit: int = 10,
-    # skip: int = 0,
+    genre_id: Optional[int] = "",
+    limit: int = 20,
+    skip: int = 0,
 ):
-    """Retrieves all songs by query, default all if no parameter given"""
+    """
+    Retrieves all songs by query, default is all if no parameter given
+    Genre_id accepts both string and int types
+    """
+    if genre_id:
 
-    if genre is not None and type(genre) == str:
         results = (
             db.query(models.Song, func.count(models.Like.song_id).label("likes"))
             .join(models.Like, models.Like.song_id == models.Song.id, isouter=True)
-            .join(models.Genre, models.Song.genre == models.Genre.id, isouter=True)
             .filter(models.Song.title.contains(title))
-            .filter(models.Genre.genre.contains(genre))
+            .filter(models.Song.genre_id == genre_id)
+            .order_by(models.Song.id)
             .group_by(models.Song.id)
+            .limit(limit)
+            .offset(skip)
         ).all()
     else:
         results = (
             db.query(models.Song, func.count(models.Like.song_id).label("likes"))
             .join(models.Like, models.Like.song_id == models.Song.id, isouter=True)
-            .join(models.Genre, models.Song.genre == models.Genre.id, isouter=True)
             .filter(models.Song.title.contains(title))
-            .filter(models.Song.genre == genre)
+            .order_by(models.Song.id)
             .group_by(models.Song.id)
+            .limit(limit)
+            .offset(skip)
         ).all()
-
     return results
 
 

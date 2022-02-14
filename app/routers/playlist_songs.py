@@ -14,7 +14,7 @@ def add_playlist_song(
     db: Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user),
 ):
-
+    """Add one song to existing playlist"""
     playlist_query = db.query(models.Playlist).filter(
         playlist_song.playlist_id == models.Playlist.id
     )
@@ -41,14 +41,16 @@ def add_playlist_song(
         )
 
     try:
-        new_playlist_song = models.PlaylistSongs(**playlist_song.dict())
+        new_playlist_song = models.PlaylistSongs(
+            created_by=current_user.id, **playlist_song.dict()
+        )
         db.add(new_playlist_song)
         db.commit()
         db.refresh(new_playlist_song)
     except:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
-            detail=f"Unable to add song: item already in playlist",
+            detail=f"Unkown Error: Unable to add song to playlist",
         )
 
     return {"messgage": "Song successfully added to playlist"}
@@ -61,6 +63,7 @@ def delete_playlist_song(
     db: Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user),
 ):
+    """Delete a song from existing playlist"""
     playlist = (
         db.query(models.Playlist).filter(models.Playlist.id == playlist_id).first()
     )
@@ -93,6 +96,7 @@ def get_playlist_songs(
     db: Session = Depends(get_db),
     current_user: int = Depends(oauth2.get_current_user),
 ):
+    """Display a list of songs in given playlist id"""
     playlist = db.query(models.Playlist).filter(models.Playlist.id == id).first()
 
     if playlist.created_by != current_user.id and playlist.private == True:

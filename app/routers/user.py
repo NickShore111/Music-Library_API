@@ -2,6 +2,7 @@ from fastapi import status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from .. import models, schemas, utils
 from ..database import get_db
+from typing import List
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
@@ -16,7 +17,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_409_CONFLICT,
             detail=f"User email: {user.email} already exists",
         )
-    
+
     hashed_password = utils.hash(user.password)
     user.password = hashed_password
     new_user = models.User(**user.dict())
@@ -35,3 +36,14 @@ def get_user(id: int, db: Session = Depends(get_db)):
             detail=f"User with id: {id} not found",
         )
     return user
+
+
+@router.get("/", response_model=List[schemas.UserOut])
+def get_useres(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    if not users:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No users available to retreive",
+        )
+    return users

@@ -94,7 +94,8 @@ def delete_artist(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/", response_model=List[schemas.ArtistOut])
+@router.get("/", response_model=List[schemas.ArtistsOut])
+# @router.get("/")
 def get_artists(
     db: Session = Depends(get_db),
     name: Optional[str] = "",
@@ -114,6 +115,7 @@ def get_artists(
     return artists
 
 
+# @router.get("/{id}")
 @router.get("/{id}", response_model=schemas.ArtistOut)
 def get_artist(id: int, db: Session = Depends(get_db)):
     """Returns one artist by id with a list of their related songs"""

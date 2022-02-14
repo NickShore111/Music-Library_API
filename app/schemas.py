@@ -1,3 +1,4 @@
+from sqlite3 import Time
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Union
 from datetime import datetime, time
@@ -34,13 +35,13 @@ class PlaylistSongs(BaseModel):
 class PlaylistBase(BaseModel):
     name: str
     private: bool = True
-    tags: List[str] = []
+    desc: Optional[str]
 
 
 class SongBase(BaseModel):
     id: int
     title: str
-    genre: Optional[str] = None
+    genre_id: Optional[str] = None
 
 
 class Like(BaseModel):
@@ -48,12 +49,21 @@ class Like(BaseModel):
     dir: conint(ge=0, le=1)
 
 
+# class LikePlaylist(BaseModel):
+#     playlist_id: int
+#     dir: conint(ge=0, le=1)
+
+
 """ Create Schemas """
+
+
+class GenreCreate(BaseModel):
+    genre_id: str
 
 
 class SongCreate(BaseModel):
     title: str
-    genre: Optional[Union[int, str]] = None
+    genre_id: Optional[int] = 0
     artist_id: int
     length: time
 
@@ -80,8 +90,9 @@ class PlaylistUpdate(PlaylistBase):
 
 class SongUpdate(BaseModel):
     title: Optional[str]
-    genre: Optional[str]
+    genre_id: Optional[str]
     artist_id: Optional[int]
+    length: Optional[Time]
 
 
 """ Return Schemas """
@@ -100,11 +111,12 @@ class ArtistCreateOut(ArtistBase):
         orm_mode = True
 
 
-class ArtistOut(BaseModel):
+class ArtistsOut(BaseModel):
     id: int
     name: str
+    created_at: datetime
+    updated_at: Optional[datetime]
     created_by: int
-    songs: Optional[List[SongBase]]
 
     class Config:
         orm_mode = True
@@ -113,7 +125,7 @@ class ArtistOut(BaseModel):
 class SongUpdateOut(BaseModel):
     id: int
     title: str
-    genre: Optional[str] = None
+    genre_id: Optional[str] = None
     length: time
     created_at: datetime
     updated_at: Optional[datetime]
@@ -126,7 +138,7 @@ class SongUpdateOut(BaseModel):
 class Song(BaseModel):
     id: int
     title: str
-    genre: int
+    genre_id: Optional[int]
     length: time
     artist_id: int
     created_at: datetime
@@ -139,12 +151,19 @@ class Song(BaseModel):
 
 class SongOut(BaseModel):
     title: str
-    genre: Optional[str]
+    genre_id: Optional[str]
     length: time
     created_at: datetime
     updated_at: Optional[datetime]
     created_by: int
     like: int
+
+    class Config:
+        orm_mode = True
+
+
+class ArtistOut(ArtistsOut):
+    songs: Optional[List[Song]] = []
 
     class Config:
         orm_mode = True
@@ -175,6 +194,7 @@ class PlaylistSongsOut(BaseModel):
     id: int
     name: str
     private: bool
+    desc: Optional[str]
     created_by: int
     created_at: datetime
     songs: List[SongBase]
@@ -187,7 +207,7 @@ class PlaylistOut(BaseModel):
     id: int
     name: str
     private: bool
-    tags: Optional[List[str]]
+    desc: Optional[str]
     created_by: str
     created_at: datetime
     updated_at: Optional[datetime]

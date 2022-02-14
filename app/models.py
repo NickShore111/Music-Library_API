@@ -1,6 +1,5 @@
 from .database import Base
 from sqlalchemy import Boolean, Column, Integer, String, ForeignKey, Time
-from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.sql.sqltypes import TIMESTAMP
 from sqlalchemy.sql.expression import text
 from sqlalchemy.orm import relationship
@@ -20,14 +19,6 @@ class User(Base):
     )
 
 
-class Tag(Base):
-    """Describes a Tags table for describing Playlists"""
-
-    __tablename__ = "tags"
-    id = Column(Integer, primary_key=True)
-    desc = Column(String, nullable=False, unique=True)
-
-
 class Playlist(Base):
     """Describes a Playlist table in db"""
 
@@ -35,25 +26,13 @@ class Playlist(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     private = Column(Boolean, server_default="True", nullable=False)
-    genre = Column(Integer, ForeignKey("genres.id", ondelete="CASCADE"), nullable=True)
+    desc = Column(String, nullable=True)
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("NOW()")
     )
     updated_at = Column(TIMESTAMP(timezone=True), onupdate=text("NOW()"), nullable=True)
     created_by = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
-
-
-class PlaylistTags(Base):
-    """Creates a many-to-many relationship between Tags and Playlists"""
-
-    __tablename__ = "playlist_tags"
-    playlist_id = Column(
-        Integer, ForeignKey("playlists.id", ondelete="CASCADE"), primary_key=True
-    )
-    tag_id = Column(
-        Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True
     )
 
 
@@ -66,6 +45,7 @@ class Artist(Base):
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("NOW()")
     )
+    updated_at = Column(TIMESTAMP(timezone=True), onupdate=text("NOW()"), nullable=True)
     created_by = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
@@ -87,11 +67,13 @@ class Song(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String, nullable=False)
     length = Column(Time, nullable=True)
-    genre = Column(Integer, ForeignKey("genres.id", ondelete="CASCADE"), nullable=True)
-    # genre_id = Column(Integer, ForeignKey("genres.id", ondelete="CASCADE"), nullable=True)
+    genre_id = Column(
+        Integer, ForeignKey("genres.id", ondelete="CASCADE"), nullable=True
+    )
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("NOW()")
     )
+    updated_at = Column(TIMESTAMP(timezone=True), onupdate=text("NOW()"), nullable=True)
     artist_id = Column(
         Integer, ForeignKey("artists.id", ondelete="CASCADE"), nullable=False
     )
@@ -99,6 +81,7 @@ class Song(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     playlist = relationship("PlaylistSongs")
+    genre = relationship("Genre")
 
 
 class PlaylistSongs(Base):
