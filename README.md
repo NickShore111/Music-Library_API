@@ -1,9 +1,8 @@
 # Music-Library_API
-API for an online community shared Music Library:
+API for an online community shared Music Library (SoundCloud):
 
 ### Features Include:
-- privacy settings for playlists
-- created_by tracking
+- Privacy settings for playlists
+- User created_by tracking with limited access
 - OAuth2 bearer token authentication
-- tag classification for playlists
-- genre classification for songs
+- Genre classification for songs
