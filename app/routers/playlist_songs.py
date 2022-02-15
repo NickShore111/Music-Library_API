@@ -1,6 +1,4 @@
-from sqlite3 import IntegrityError
 from fastapi import Response, status, HTTPException, Depends, APIRouter
-from pydantic import HttpUrl
 from sqlalchemy.orm import Session
 from .. import models, schemas, oauth2
 from ..database import get_db

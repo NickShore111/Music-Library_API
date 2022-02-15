@@ -1,13 +1,14 @@
-from charset_normalizer import models
 from fastapi import FastAPI
-from . import models
-from .database import engine
+
+# from . import models
+# from .database import engine
 from .routers import genre, like, playlist, user, artist, song, auth, playlist_songs
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-models.Base.metadata.create_all(bind=engine)
+# Used to auto create database tables, deprecated for alembic
+# models.Base.metadata.create_all(bind=engine)
 
 origins = ["*"]
 

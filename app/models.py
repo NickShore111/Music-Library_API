@@ -81,7 +81,6 @@ class Song(Base):
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     playlist = relationship("PlaylistSongs")
-    genre = relationship("Genre")
 
 
 class PlaylistSongs(Base):
